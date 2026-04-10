@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Book Management</title>
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div>
+        <h1>Quản lý sách</h1>
+        <p>Giao diện cơ bản cho Books, Authors và Categories</p>
+      </div>
+      <nav class="app-nav">
+        <button data-page="books" class="active">Sách</button>
+        <button data-page="authors">Tác giả</button>
+        <button data-page="categories">Thể loại</button>
+      </nav>
+    </header>
+
+    <main>
+      <section id="books" class="page active">
+        <div class="panel">
+          <h2>Danh sách sách</h2>
+          <div class="filter-row">
+            <input id="book-keyword" type="text" placeholder="Tìm theo tiêu đề hoặc mô tả" />
+            <input id="book-year" type="number" placeholder="Năm xuất bản" min="0" />
+            <select id="book-author-filter"><option value="">Tất cả tác giả</option></select>
+            <select id="book-category-filter"><option value="">Tất cả thể loại</option></select>
+            <button id="btn-refresh-books">Làm mới</button>
+          </div>
+          <div id="book-list" class="table"></div>
+        </div>
+
+        <div class="panel">
+          <h2>Thêm sách mới</h2>
+          <form id="book-form" class="form-grid">
+            <label>Tên sách<input name="title" required /></label>
+            <label>Năm xuất bản<input name="published_year" type="number" required /></label>
+            <label>Tác giả<select name="author_id" required></select></label>
+            <label>Thể loại<select name="category_id" required></select></label>
+            <label>Mô tả<textarea name="description"></textarea></label>
+            <div class="form-actions">
+              <button type="submit">Tạo sách</button>
+              <span id="book-message" class="message"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="authors" class="page">
+        <div class="panel">
+          <h2>Danh sách tác giả</h2>
+          <div id="author-list" class="table"></div>
+        </div>
+        <div class="panel">
+          <h2>Thêm tác giả</h2>
+          <form id="author-form" class="form-grid">
+            <label>Tên tác giả<input name="name" required /></label>
+            <label>Tiểu sử<textarea name="bio"></textarea></label>
+            <div class="form-actions">
+              <button type="submit">Tạo tác giả</button>
+              <span id="author-message" class="message"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+
+      <section id="categories" class="page">
+        <div class="panel">
+          <h2>Danh sách thể loại</h2>
+          <div id="category-list" class="table"></div>
+        </div>
+        <div class="panel">
+          <h2>Thêm thể loại</h2>
+          <form id="category-form" class="form-grid">
+            <label>Tên thể loại<input name="name" required /></label>
+            <label>Mô tả<textarea name="description"></textarea></label>
+            <div class="form-actions">
+              <button type="submit">Tạo thể loại</button>
+              <span id="category-message" class="message"></span>
+            </div>
+          </form>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="/static/app.js"></script>
+</body>
+</html>
