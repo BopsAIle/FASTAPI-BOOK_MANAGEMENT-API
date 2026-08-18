@@ -12,6 +12,7 @@ class Book(Document):
     title: str
     description: str | None = None
     published_year: int
+    price: int = Field(default=0, ge=0)
     author_id: PydanticObjectId
     category_id: PydanticObjectId
     cover_image: str | None = None

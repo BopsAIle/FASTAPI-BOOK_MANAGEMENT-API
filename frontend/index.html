@@ -39,6 +39,7 @@
           <form id="book-form" class="form-grid">
             <label>Tên sách<input name="title" required /></label>
             <label>Năm xuất bản<input name="published_year" type="number" required /></label>
+            <label>Giá (VND)<input name="price" type="number" min="0" step="1000" required /></label>
             <label>Tác giả<select name="author_id" required></select></label>
             <label>Thể loại<select name="category_id" required></select></label>
             <label>Mô tả<textarea name="description"></textarea></label>
