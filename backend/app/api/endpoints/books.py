@@ -33,6 +33,7 @@ async def _book_schema(book: Book, author: Author, category: Category) -> BookSc
         title=book.title,
         description=book.description,
         published_year=book.published_year,
+        price=book.price,
         author_id=str(book.author_id),
         category_id=str(book.category_id),
         cover_image=book.cover_image,
@@ -123,6 +124,7 @@ async def create_book(book_in: BookCreate):
         title=book_in.title,
         description=book_in.description,
         published_year=book_in.published_year,
+        price=book_in.price,
         author_id=a_oid,
         category_id=c_oid,
     )
@@ -144,6 +146,8 @@ async def update_book(book_id: str, book_up: BookUpdate):
         book.description = book_up.description
     if book_up.published_year is not None:
         book.published_year = book_up.published_year
+    if book_up.price is not None:
+        book.price = book_up.price
 
     if book_up.author_id is not None:
         new_a = parse_object_id(book_up.author_id)

@@ -91,6 +91,12 @@ function renderCategoryOptions() {
   });
 }
 
+function formatPrice(value) {
+  const amount = Number(value);
+  if (!Number.isFinite(amount) || amount <= 0) return "Chưa có giá";
+  return `${amount.toLocaleString("vi-VN")} ₫`;
+}
+
 function renderBooks() {
   if (books.length === 0) {
     dom.bookList.innerHTML = "<p>Không có sách nào.</p>";
@@ -105,6 +111,7 @@ function renderBooks() {
           <th>Tiêu đề</th>
           <th>Tác giả / Thể loại</th>
           <th>Năm</th>
+          <th>Giá</th>
           <th>Hành động</th>
         </tr>
       </thead>
@@ -121,6 +128,7 @@ function renderBooks() {
               <div>${book.category.name}</div>
             </td>
             <td>${book.published_year}</td>
+            <td>${formatPrice(book.price)}</td>
             <td class='actions'>
               <button type="button" class='secondary' onclick='editBook(${JSON.stringify(book.id)})'>Sửa</button>
               <button type="button" class='danger' onclick='deleteBook(${JSON.stringify(book.id)})'>Xóa</button>
@@ -236,6 +244,8 @@ window.editBook = async (bookId) => {
   if (title === null) return;
   const published_year = parseInt(prompt("Năm xuất bản", String(book.published_year)) || "", 10);
   if (Number.isNaN(published_year)) return alert("Năm xuất bản không hợp lệ");
+  const price = parseInt(prompt("Giá (VND)", String(book.price ?? 0)) || "", 10);
+  if (Number.isNaN(price) || price < 0) return alert("Giá sách không hợp lệ");
   const author_id = (prompt("ID tác giả", book.author.id) || "").trim();
   const category_id = (prompt("ID thể loại", book.category.id) || "").trim();
   if (!author_id || !category_id) return;
@@ -243,7 +253,7 @@ window.editBook = async (bookId) => {
   await fetchJson(`${api.books}/${bookId}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ title, published_year, author_id, category_id, description }),
+    body: JSON.stringify({ title, published_year, price, author_id, category_id, description }),
   });
   await loadBooks();
 };
@@ -294,6 +304,7 @@ dom.bookForm.addEventListener("submit", async (event) => {
         title: form.get("title"),
         description: form.get("description"),
         published_year: Number(form.get("published_year")),
+        price: Number(form.get("price")),
         author_id: String(form.get("author_id") || ""),
         category_id: String(form.get("category_id") || ""),
       }),
