@@ -7,17 +7,51 @@
   <link rel="stylesheet" href="/static/styles.css" />
 </head>
 <body>
-  <div class="app-shell">
+  <div id="auth-screen" class="auth-screen">
+    <div class="panel auth-panel">
+      <h1>Quản lý sách</h1>
+      <p>Đăng nhập hoặc đăng ký để tiếp tục</p>
+      <div class="auth-tabs">
+        <button type="button" id="tab-login" class="active">Đăng nhập</button>
+        <button type="button" id="tab-register">Đăng ký</button>
+      </div>
+      <form id="login-form" class="form-grid">
+        <label>Email<input name="email" type="email" required /></label>
+        <label>Mật khẩu<input name="password" type="password" required minlength="6" /></label>
+        <div class="form-actions">
+          <button type="submit">Đăng nhập</button>
+          <span id="login-message" class="message"></span>
+        </div>
+      </form>
+      <form id="register-form" class="form-grid" hidden>
+        <label>Email<input name="email" type="email" required /></label>
+        <label>Họ tên<input name="full_name" /></label>
+        <label>Mật khẩu<input name="password" type="password" required minlength="6" /></label>
+        <div class="form-actions">
+          <button type="submit">Đăng ký</button>
+          <span id="register-message" class="message"></span>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-shell" id="app-shell" hidden>
     <header class="app-header">
       <div>
         <h1>Quản lý sách</h1>
         <p>Giao diện cơ bản cho Books, Authors và Categories</p>
       </div>
-      <nav class="app-nav">
-        <button data-page="books" class="active">Sách</button>
-        <button data-page="authors">Tác giả</button>
-        <button data-page="categories">Thể loại</button>
-      </nav>
+      <div class="header-actions">
+        <nav class="app-nav">
+          <button data-page="books" class="active">Sách</button>
+          <button data-page="authors">Tác giả</button>
+          <button data-page="categories">Thể loại</button>
+        </nav>
+        <div class="user-bar">
+          <span id="current-user-email"></span>
+          <button type="button" id="btn-logout" class="secondary">Đăng xuất</button>
+        </div>
+      </div>
     </header>
 
     <main>

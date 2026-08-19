@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.models.author import Author
 from app.models.book import Book
 from app.models.category import Category
+from app.models.user import User
 
 _client: AsyncMongoClient | None = None
 #Đây là code base của sự kết hợp AsyncMongoClient và Beanie
@@ -22,7 +23,7 @@ async def connect_db() -> None:
     #
     await init_beanie(
         database=_client[settings.MONGODB_DB_NAME],
-        document_models=[Author, Category, Book], #các bảng được import từ models.py
+        document_models=[Author, Category, Book, User], #các bảng được import từ models.py
     )
 
 

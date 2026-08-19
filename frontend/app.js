@@ -1,10 +1,25 @@
+const TOKEN_KEY = "access_token";
+
 const api = {
   books: "/books",
   authors: "/authors",
   categories: "/categories",
+  login: "/auth/login",
+  register: "/auth/register",
+  me: "/auth/me",
 };
 
 const dom = {
+  authScreen: document.getElementById("auth-screen"),
+  appShell: document.getElementById("app-shell"),
+  loginForm: document.getElementById("login-form"),
+  registerForm: document.getElementById("register-form"),
+  loginMessage: document.getElementById("login-message"),
+  registerMessage: document.getElementById("register-message"),
+  tabLogin: document.getElementById("tab-login"),
+  tabRegister: document.getElementById("tab-register"),
+  currentUserEmail: document.getElementById("current-user-email"),
+  logoutButton: document.getElementById("btn-logout"),
   pages: document.querySelectorAll(".page"),
   navButtons: document.querySelectorAll(".app-nav button"),
   bookList: document.getElementById("book-list"),
@@ -26,14 +41,64 @@ const dom = {
 let authors = [];
 let categories = [];
 let books = [];
+let currentUser = null;
+
+function getToken() {
+  return localStorage.getItem(TOKEN_KEY);
+}
+
+function setToken(token) {
+  localStorage.setItem(TOKEN_KEY, token);
+}
+
+function clearToken() {
+  localStorage.removeItem(TOKEN_KEY);
+}
+
+function showAuth() {
+  currentUser = null;
+  if (dom.currentUserEmail) dom.currentUserEmail.textContent = "";
+  dom.authScreen.hidden = false;
+  dom.appShell.hidden = true;
+}
+
+function showApp(user) {
+  currentUser = user;
+  if (dom.currentUserEmail) {
+    dom.currentUserEmail.textContent = user.full_name
+      ? `${user.full_name} (${user.email})`
+      : user.email;
+  }
+  dom.authScreen.hidden = true;
+  dom.appShell.hidden = false;
+}
+
+function logout() {
+  clearToken();
+  authors = [];
+  categories = [];
+  books = [];
+  showAuth();
+}
 
 function activatePage(pageId) {
   dom.pages.forEach((page) => page.classList.toggle("active", page.id === pageId));
   dom.navButtons.forEach((btn) => btn.classList.toggle("active", btn.dataset.page === pageId));
 }
 
-async function fetchJson(url, options) {
-  const response = await fetch(url, options);
+function isAuthUrl(url) {
+  return url.startsWith(api.login) || url.startsWith(api.register);
+}
+
+async function fetchJson(url, options = {}) {
+  const token = getToken();
+  const headers = { ...(options.headers || {}) };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  const response = await fetch(url, { ...options, headers });
+  if (response.status === 401 && !isAuthUrl(url)) {
+    logout();
+    throw new Error("Phiên đăng nhập hết hạn");
+  }
   if (!response.ok) {
     const error = await response.json().catch(() => ({ detail: response.statusText }));
     const detail = error.detail;
@@ -44,6 +109,18 @@ async function fetchJson(url, options) {
   }
   if (response.status === 204) return null;
   return response.json();
+}
+
+function setAuthTab(mode) {
+  const isLogin = mode === "login";
+  dom.tabLogin.classList.toggle("active", isLogin);
+  dom.tabRegister.classList.toggle("active", !isLogin);
+  dom.loginForm.hidden = !isLogin;
+  dom.registerForm.hidden = isLogin;
+  dom.loginMessage.textContent = "";
+  dom.registerMessage.textContent = "";
+  dom.loginMessage.classList.remove("error");
+  dom.registerMessage.classList.remove("error");
 }
 
 async function loadAuthors() {
@@ -364,10 +441,77 @@ dom.categoryForm.addEventListener("submit", async (event) => {
 
 dom.refreshBooks.addEventListener("click", loadBooks);
 
-async function init() {
+dom.tabLogin.addEventListener("click", () => setAuthTab("login"));
+dom.tabRegister.addEventListener("click", () => setAuthTab("register"));
+dom.logoutButton.addEventListener("click", logout);
+
+dom.loginForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  dom.loginMessage.textContent = "";
+  dom.loginMessage.classList.remove("error");
+  const form = new FormData(dom.loginForm);
+  try {
+    const token = await fetchJson(api.login, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: String(form.get("email") || "").trim(),
+        password: String(form.get("password") || ""),
+      }),
+    });
+    setToken(token.access_token);
+    await enterApp();
+  } catch (error) {
+    dom.loginMessage.textContent = error.message;
+    dom.loginMessage.classList.add("error");
+  }
+});
+
+dom.registerForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  dom.registerMessage.textContent = "";
+  dom.registerMessage.classList.remove("error");
+  const form = new FormData(dom.registerForm);
+  try {
+    const token = await fetchJson(api.register, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: String(form.get("email") || "").trim(),
+        password: String(form.get("password") || ""),
+        full_name: String(form.get("full_name") || "").trim() || null,
+      }),
+    });
+    setToken(token.access_token);
+    await enterApp();
+  } catch (error) {
+    dom.registerMessage.textContent = error.message;
+    dom.registerMessage.classList.add("error");
+  }
+});
+
+async function enterApp() {
+  const user = await fetchJson(api.me);
+  showApp(user);
   await loadAuthors();
   await loadCategories();
   await loadBooks();
+}
+
+async function init() {
+  if (!getToken()) {
+    showAuth();
+    return;
+  }
+  try {
+    await enterApp();
+  } catch (error) {
+    showAuth();
+    if (dom.loginMessage) {
+      dom.loginMessage.textContent = error.message;
+      dom.loginMessage.classList.add("error");
+    }
+  }
 }
 
 window.addEventListener("DOMContentLoaded", init);
