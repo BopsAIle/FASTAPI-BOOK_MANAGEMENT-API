@@ -22,6 +22,15 @@ class Settings(BaseModel):
         default_factory=lambda: os.environ.get("MONGODB_DB_NAME", "book_management"),
         description="Database name",
     )
+    SECRET_KEY: str = Field(
+        default_factory=lambda: os.environ.get(
+            "SECRET_KEY",
+            "dev-secret-change-me-not-for-production",
+        ),
+        description="JWT signing key. Set SECRET_KEY in production.",
+    )
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
 
 
 settings = Settings()
